@@ -232,7 +232,6 @@ static int needleAtOffset(MMBitmapRef needle, MMBitmapRef haystack,
 
     // 检查needle是否为空，如果为空，则返回错误
     if (needle == NULL) {
-        // 处理错误
         return 0;
     }
 
@@ -241,10 +240,13 @@ static int needleAtOffset(MMBitmapRef needle, MMBitmapRef haystack,
         for (scan.x = lastPoint.x; scan.x >= 0; --scan.x) {
             // 检查scan.x和scan.y是否在needle的边界内，如果超出边界，则返回错误
             if (scan.x < 0 || scan.x >= needle->width || scan.y < 0 || scan.y >= needle->height) {
-                // 处理错误
                 return 0;
             }
-
+            // 检查offset.x + scan.x和offset.y + scan.y是否在haystack的边界内
+            if (offset.x + scan.x < 0 || offset.x + scan.x >= haystack->width || offset.y + scan.y < 0 || offset.y + scan.y >= haystack->height) {
+                // 如果超出边界，返回0
+                return 0;
+            }
             // 获取needle和haystack在当前扫描点的颜色
             MMRGBHex ncolor = MMRGBHexAtPoint(needle, scan.x, scan.y);
             MMRGBHex hcolor = MMRGBHexAtPoint(haystack, offset.x + scan.x, offset.y + scan.y);
@@ -257,7 +259,6 @@ static int needleAtOffset(MMBitmapRef needle, MMBitmapRef haystack,
     // 如果所有点的颜色都相似，则返回1
     return 1;
 }
-
 
 /* --- Hash table helper functions --- */
 
