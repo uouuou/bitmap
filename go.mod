@@ -1,4 +1,4 @@
-module github.com/vcaesar/bitmap
+module github.com/uouuou/bitmap
 
 go 1.17
 
