@@ -226,6 +226,8 @@ static void initBadShiftTable(UTHashTable *jumpTable, MMBitmapRef needle)
 static int needleAtOffset(MMBitmapRef needle, MMBitmapRef haystack,
                           MMPoint offset, float tolerance)
 {
+    MMBitmapRef old_needle = needle;
+    MMBitmapRef old_haystack = haystack;
     // 确定needle的最后一个点的位置
     const MMPoint lastPoint = MMPointMake(needle->width - 1, needle->height - 1);
     MMPoint scan;
@@ -252,7 +254,17 @@ static int needleAtOffset(MMBitmapRef needle, MMBitmapRef haystack,
                 return 0;
             }
             // 获取needle和haystack在当前扫描点的颜色
+            // 进行比较，看是否被修改
+            if(old_needle != needle || old_haystack != haystack){
+                // 如果 needle 或者 haystack 已被修改，返回0
+                return 0;
+            }
             MMRGBHex ncolor = MMRGBHexAtPoint(needle, scan.x, scan.y);
+            // 进行比较，看是否被修改
+            if(old_needle != needle || old_haystack != haystack){
+                // 如果 needle 或者 haystack 已被修改，返回0
+                return 0;
+            }
             MMRGBHex hcolor = MMRGBHexAtPoint(haystack, offset.x + scan.x, offset.y + scan.y);
 
             // 如果两个颜色不相似，则返回0
@@ -263,7 +275,6 @@ static int needleAtOffset(MMBitmapRef needle, MMBitmapRef haystack,
     // 如果所有点的颜色都相似，则返回1
     return 1;
 }
-
 /* --- Hash table helper functions --- */
 
 static void addNodeToTable(UTHashTable *table, MMRGBHex hexColor, MMPoint offset) {
