@@ -247,6 +247,10 @@ static int needleAtOffset(MMBitmapRef needle, MMBitmapRef haystack,
                 // 如果超出边界，返回0
                 return 0;
             }
+            //再次检查needle是否为空，如果为空，则返回错误
+            if (needle == NULL) {
+                return 0;
+            }
             // 获取needle和haystack在当前扫描点的颜色
             MMRGBHex ncolor = MMRGBHexAtPoint(needle, scan.x, scan.y);
             MMRGBHex hcolor = MMRGBHexAtPoint(haystack, offset.x + scan.x, offset.y + scan.y);
