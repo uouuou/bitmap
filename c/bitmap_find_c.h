@@ -222,27 +222,42 @@ static void initBadShiftTable(UTHashTable *jumpTable, MMBitmapRef needle)
 	}
 }
 
+/* 如果在|haystack|的|offset|处找到|needle|，则返回true */
 static int needleAtOffset(MMBitmapRef needle, MMBitmapRef haystack,
                           MMPoint offset, float tolerance)
 {
-	const MMPoint lastPoint = MMPointMake(needle->width - 1, needle->height - 1);
-	MMPoint scan;
+    // 确定needle的最后一个点的位置
+    const MMPoint lastPoint = MMPointMake(needle->width - 1, needle->height - 1);
+    MMPoint scan;
 
-	/* Note that |needle| is searched backwards, in accordance with the
-	 * Boyer-Moore search algorithm. */
-	for (scan.y = lastPoint.y; ; --scan.y) {
-		for (scan.x = lastPoint.x; ; --scan.x) {
-			MMRGBHex ncolor = MMRGBHexAtPoint(needle, scan.x, scan.y);
-			MMRGBHex hcolor = MMRGBHexAtPoint(haystack, offset.x + scan.x,
-			                                            offset.y + scan.y);
-			if (!MMRGBHexSimilarToColor(ncolor, hcolor, tolerance)) return 0;
-			if (scan.x == 0) break; /* Avoid infinite loop from unsigned type. */
-		}
-		if (scan.y == 0) break;
-	}
+    // 检查needle是否为空，如果为空，则返回错误
+    if (needle == NULL) {
+        // 处理错误
+        return 0;
+    }
 
-	return 1;
+    // 注意，我们是按照Boyer-Moore搜索算法的方式，从后向前搜索needle
+    for (scan.y = lastPoint.y; scan.y >= 0; --scan.y) {
+        for (scan.x = lastPoint.x; scan.x >= 0; --scan.x) {
+            // 检查scan.x和scan.y是否在needle的边界内，如果超出边界，则返回错误
+            if (scan.x < 0 || scan.x >= needle->width || scan.y < 0 || scan.y >= needle->height) {
+                // 处理错误
+                return 0;
+            }
+
+            // 获取needle和haystack在当前扫描点的颜色
+            MMRGBHex ncolor = MMRGBHexAtPoint(needle, scan.x, scan.y);
+            MMRGBHex hcolor = MMRGBHexAtPoint(haystack, offset.x + scan.x, offset.y + scan.y);
+
+            // 如果两个颜色不相似，则返回0
+            if (!MMRGBHexSimilarToColor(ncolor, hcolor, tolerance)) return 0;
+        }
+    }
+
+    // 如果所有点的颜色都相似，则返回1
+    return 1;
 }
+
 
 /* --- Hash table helper functions --- */
 
