@@ -35,7 +35,6 @@ import (
 	"unsafe"
 
 	"github.com/go-vgo/robotgo"
-	// "github.com/vcaesar/tt"
 )
 
 /*
@@ -119,8 +118,8 @@ func internalFind(bit, sbit robotgo.CBitmap, tolerance float64) (int, int) {
 //
 //	bitmap.Find(bitmap, source_bitmap robotgo.CBitmap, tolerance float64)
 //
-// 	|tolerance| should be in the range 0.0f - 1.0f, denoting how closely the
-// 	colors in the bitmaps need to match, with 0 being exact and 1 being any.
+//	|tolerance| should be in the range 0.0f - 1.0f, denoting how closely the
+//	colors in the bitmaps need to match, with 0 being exact and 1 being any.
 //
 // This method only automatically free the internal bitmap,
 // use `defer robotgo.FreeBitmap(bit)` to free the bitmap
