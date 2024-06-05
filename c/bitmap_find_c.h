@@ -226,55 +226,25 @@ static void initBadShiftTable(UTHashTable *jumpTable, MMBitmapRef needle)
 static int needleAtOffset(MMBitmapRef needle, MMBitmapRef haystack,
                           MMPoint offset, float tolerance)
 {
-    MMBitmapRef old_needle = needle;
-    MMBitmapRef old_haystack = haystack;
-    // 确定needle的最后一个点的位置
-    const MMPoint lastPoint = MMPointMake(needle->width - 1, needle->height - 1);
-    MMPoint scan;
+	const MMPoint lastPoint = MMPointMake(needle->width - 1, needle->height - 1);
+	MMPoint scan;
 
-    // 检查needle是否为空，如果为空，则返回错误
-    if (needle == NULL) {
-        return 0;
-    }
+	/* Note that |needle| is searched backwards, in accordance with the
+	 * Boyer-Moore search algorithm. */
+	for (scan.y = lastPoint.y; ; --scan.y) {
+		for (scan.x = lastPoint.x; ; --scan.x) {
+			MMRGBHex ncolor = MMRGBHexAtPoint(needle, scan.x, scan.y);
+			MMRGBHex hcolor = MMRGBHexAtPoint(haystack, offset.x + scan.x,
+			                                            offset.y + scan.y);
+			if (!MMRGBHexSimilarToColor(ncolor, hcolor, tolerance)) return 0;
+			if (scan.x == 0) break; /* Avoid infinite loop from unsigned type. */
+		}
+		if (scan.y == 0) break;
+	}
 
-    // 注意，我们是按照Boyer-Moore搜索算法的方式，从后向前搜索needle
-    for (scan.y = lastPoint.y; scan.y >= 0; --scan.y) {
-        for (scan.x = lastPoint.x; scan.x >= 0; --scan.x) {
-            // 检查scan.x和scan.y是否在needle的边界内，如果超出边界，则返回错误
-            if (scan.x < 0 || scan.x >= needle->width || scan.y < 0 || scan.y >= needle->height) {
-                return 0;
-            }
-            // 检查offset.x + scan.x和offset.y + scan.y是否在haystack的边界内
-            if (offset.x + scan.x < 0 || offset.x + scan.x >= haystack->width || offset.y + scan.y < 0 || offset.y + scan.y >= haystack->height) {
-                // 如果超出边界，返回0
-                return 0;
-            }
-            //再次检查needle是否为空，如果为空，则返回错误
-            if (needle == NULL) {
-                return 0;
-            }
-            // 获取needle和haystack在当前扫描点的颜色
-            // 进行比较，看是否被修改
-            if(old_needle != needle || old_haystack != haystack){
-                // 如果 needle 或者 haystack 已被修改，返回0
-                return 0;
-            }
-            MMRGBHex ncolor = MMRGBHexAtPoint(needle, scan.x, scan.y);
-            // 进行比较，看是否被修改
-            if(old_needle != needle || old_haystack != haystack){
-                // 如果 needle 或者 haystack 已被修改，返回0
-                return 0;
-            }
-            MMRGBHex hcolor = MMRGBHexAtPoint(haystack, offset.x + scan.x, offset.y + scan.y);
-
-            // 如果两个颜色不相似，则返回0
-            if (!MMRGBHexSimilarToColor(ncolor, hcolor, tolerance)) return 0;
-        }
-    }
-
-    // 如果所有点的颜色都相似，则返回1
-    return 1;
+	return 1;
 }
+
 /* --- Hash table helper functions --- */
 
 static void addNodeToTable(UTHashTable *table, MMRGBHex hexColor, MMPoint offset) {

@@ -86,13 +86,13 @@ func ToMMBitmapRef(bit robotgo.CBitmap) C.MMBitmapRef {
 
 // ToBytes saves robotgo.CBitmap to format in bytes
 func ToBytes(bit robotgo.CBitmap) []byte {
-	var len C.size_t
-	ptr := C.saveMMBitmapAsBytes(ToThis(bit), &len)
-	if int(len) < 0 {
+	var sizeT C.size_t
+	ptr := C.saveMMBitmapAsBytes(ToThis(bit), &sizeT)
+	if int(sizeT) < 0 {
 		return nil
 	}
 
-	bs := C.GoBytes(unsafe.Pointer(ptr), C.int(len))
+	bs := C.GoBytes(unsafe.Pointer(ptr), C.int(sizeT))
 	C.free(unsafe.Pointer(ptr))
 	return bs
 }
